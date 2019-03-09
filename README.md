@@ -20,6 +20,13 @@ Have a page with functionality that can be adapted to specific case. Like add sp
 
 ## History
 
+## 0.4
+- Basic add&get node API added
+- Test for encapsulation added
+
+### 0.3
+- Basis for coreGraph module with test
+
 ### 0.2
 - Default graph data added
 

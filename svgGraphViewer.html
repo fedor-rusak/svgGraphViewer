@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.2</title>
+		<title>svgGraphViewer 0.4</title>
 
 		<script>
 			"use strict";
@@ -24,7 +24,69 @@
 		<script>
 			"use strict";
 
+			//Graph-like data structure.
+			const coreGraph = function() {
+				const generateGraphStructure = function() {
+					//actual instance state
+					var nodeNames = [],
+					    nodeData = {};
+
+					//newNodeData object is mandatory!
+					const addNode = function(newNodeName, newNodeData) {
+						newNodeData = newNodeData || {};
+
+						if (nodeData[newNodeName] === undefined && typeof newNodeData === 'object') {
+							nodeData[newNodeName] = newNodeData;
+							nodeData[newNodeName]["name"] = newNodeName;
+							nodeNames.push(newNodeName);
+						}
+					}
+
+					const getNode = function(nodeName) {
+						return nodeData[nodeName];
+					}
+
+					return {
+						addNode,
+						getNode
+					};
+				};
+
+				//TESTS
+				try {
+					let testGraph = generateGraphStructure();
+
+					let nodeName = "A";
+					let nodeDescription = "A node";
+					let nodeData = {description: nodeDescription};
+					testGraph.addNode(nodeName, nodeData);
+					if (testGraph.getNode(nodeName).description !== nodeDescription) {
+						throw new Error("Adding node with data failed!");
+					}
+
+					//someone modified added nodeData object
+					nodeData.description = "NOT A node";
+					if (testGraph.getNode(nodeName).description !== nodeDescription) {
+						throw new Error("Node data was modified without proper API call!");
+					}
+				}
+				catch (e) {
+					alert("Adding&Getting API failed!\n" + e);
+					throw e;
+				}
+
+				//module API
+				return {
+					generateGraphStructure
+				}
+			}();
+		</script>
+
+		<script>
+			"use strict";
+
 			window.onload = function () {
+				const graphInstance = coreGraph.generateGraphStructure();
 				alert("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 			};
 		</script>
