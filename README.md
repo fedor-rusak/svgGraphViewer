@@ -29,6 +29,9 @@ TO-DO:
 
 ## History
 
+## 0.9
+- test refactoring
+
 ## 0.8
 - graph data structure API added
 - tests improved

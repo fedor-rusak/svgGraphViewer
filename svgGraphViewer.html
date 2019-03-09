@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.8</title>
+		<title>svgGraphViewer 0.9</title>
 
 		<script>
 			"use strict";
@@ -102,6 +102,21 @@
 				};
 
 				//TESTS
+				const wrapperForExceptionThrowingAPICall = function(func, errorMessage) {
+					let noException = true;
+
+					try {
+						func();
+					}
+					catch (e) {
+						noException = false;
+					}
+
+					if (noException) {
+						throw new Error(errorMessage);
+					}
+				}
+
 				try {
 					let testGraph = generateGraphStructure();
 
@@ -133,21 +148,15 @@
 					}
 
 
-					let noException = true;
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							let thirdNodeName = "C";
+							let invalidNodeProperties = {description: {description: "Objects NOT allowed as properties!"}};
 
-					try {
-						let thirdNodeName = "C";
-						let invalidNodeProperties = {description: {description: "Objects NOT allowed as properties!"}};
-
-						testGraph.addNode(thirdNodeName, invalidNodeProperties);
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Node properties validation failed!");
-					}
+							testGraph.addNode(thirdNodeName, invalidNodeProperties);
+						},
+						"Node properties validation failed!"
+					);
 				}
 				catch (e) {
 					alert("Adding&Getting Node API failed!\n" + e);
@@ -163,76 +172,48 @@
 					let newNodeDescription = "A node with new description";
 
 
-					let noException = true;
-
-					try {
-						testGraph.setNodeProperty(nodeName, "description", newNodeDescription);
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Setting property for non-existent node is not allowed!");
-					}
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setNodeProperty(nodeName, "description", newNodeDescription);
+						},
+						"Setting property for non-existent node is not allowed!"
+					);
 
 
+					//now node must exist in graph
 					testGraph.addNode(nodeName, nodeProperties);
 
- 					noException = true;
 
-					try {
-						testGraph.setNodeProperty(nodeName, undefined, newNodeDescription);
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Setting property with undefined name is not allowed!");
-					}					
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setNodeProperty(nodeName, undefined, newNodeDescription);
+						},
+						"Setting property with undefined name is not allowed!"
+					);
 
 
- 					noException = true;
-
-					try {
-						testGraph.setNodeProperty(nodeName, {name:"name"}, newNodeDescription);
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Property name can only be a string!");
-					}					
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setNodeProperty(nodeName, {name:"name"}, newNodeDescription);
+						},
+						"Property name can only be a string!"
+					);
 
 
- 					noException = true;
-
-					try {
-						testGraph.setNodeProperty(nodeName, "name", "SneakyNewName");
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Property with name 'name' is not allowed to modify!");
-					}					
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setNodeProperty(nodeName, "name", "SneakyNewName");
+						},
+						"Property with name 'name' is not allowed to modify!"
+					);
 
 
- 					noException = true;
-
-					try {
-						testGraph.setNodeProperty(nodeName, "validPropertyName", {"note": "Objects not allowed!"});
-					}
-					catch (e) {
-						noException = false;
-					}
-					
-					if (noException) {
-						throw new Error("Setting property with 'object' value is not allowed!");
-					}					
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setNodeProperty(nodeName, "validPropertyName", {"note": "Objects not allowed!"});
+						},
+						"Setting property with 'object' value is not allowed!"
+					);
 
 
 					testGraph.setNodeProperty(nodeName, "description", newNodeDescription);
