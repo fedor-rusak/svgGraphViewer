@@ -20,6 +20,10 @@ Have a page with functionality that can be adapted to specific case. Like add sp
 
 ## History
 
+## 0.6
+- encapsulation improved
+- graph data structure input validation test added
+
 ## 0.5
 - Refactoring. Name simplification.
 
