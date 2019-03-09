@@ -20,6 +20,9 @@ Have a page with functionality that can be adapted to specific case. Like add sp
 
 ## History
 
+## 0.5
+- Refactoring. Name simplification.
+
 ## 0.4
 - Basic add&get node API added
 - Test for encapsulation added

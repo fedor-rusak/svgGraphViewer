@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.4</title>
+		<title>svgGraphViewer 0.5</title>
 
 		<script>
 			"use strict";
@@ -29,21 +29,20 @@
 				const generateGraphStructure = function() {
 					//actual instance state
 					var nodeNames = [],
-					    nodeData = {};
+					    nodePropertiesStorage = {};
 
-					//newNodeData object is mandatory!
-					const addNode = function(newNodeName, newNodeData) {
-						newNodeData = newNodeData || {};
+					const addNode = function(newName, newProperties) {
+						newProperties = newProperties || {};
 
-						if (nodeData[newNodeName] === undefined && typeof newNodeData === 'object') {
-							nodeData[newNodeName] = newNodeData;
-							nodeData[newNodeName]["name"] = newNodeName;
-							nodeNames.push(newNodeName);
+						if (nodePropertiesStorage[newName] === undefined && typeof newProperties === 'object') {
+							nodePropertiesStorage[newName] = newProperties;
+							nodePropertiesStorage[newName]["name"] = newName;
+							nodeNames.push(newName);
 						}
 					}
 
 					const getNode = function(nodeName) {
-						return nodeData[nodeName];
+						return nodePropertiesStorage[nodeName];
 					}
 
 					return {
@@ -58,16 +57,17 @@
 
 					let nodeName = "A";
 					let nodeDescription = "A node";
-					let nodeData = {description: nodeDescription};
-					testGraph.addNode(nodeName, nodeData);
+					let nodeProperties = {description: nodeDescription};
+
+					testGraph.addNode(nodeName, nodeProperties);
 					if (testGraph.getNode(nodeName).description !== nodeDescription) {
-						throw new Error("Adding node with data failed!");
+						throw new Error("Adding node with properties failed!");
 					}
 
-					//someone modified added nodeData object
-					nodeData.description = "NOT A node";
+					//someone modified added nodeProperties object
+					nodeProperties.description = "NOT A node";
 					if (testGraph.getNode(nodeName).description !== nodeDescription) {
-						throw new Error("Node data was modified without proper API call!");
+						throw new Error("Node properties were modified without proper API call!");
 					}
 				}
 				catch (e) {
