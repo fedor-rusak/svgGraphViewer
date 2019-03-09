@@ -2,12 +2,30 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.1</title>
+		<title>svgGraphViewer 0.2</title>
+
+		<script>
+			"use strict";
+
+			//example data with graph like
+			// A ---> B ---> C1
+			//           `-> C2 --> D1
+			//                  `-> D2
+			const inputData = [
+				{nodeName: "A", depends:[]},
+				{nodeName: "B", depends: ["A"]},
+				{nodeName: "C1", depends: ["B"]},
+				{nodeName: "C2", depends: ["B"]},
+				{nodeName: "D1", depends: ["C2"]},
+				{nodeName: "D2", depends: ["C2"]}
+			];
+		</script>
+
 		<script>
 			"use strict";
 
 			window.onload = function () {
-				alert("This is the first step in simple SVG graph Viewr application!");
+				alert("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 			};
 		</script>
 	</head>
