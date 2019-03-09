@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.7</title>
+		<title>svgGraphViewer 0.8</title>
 
 		<script>
 			"use strict";
@@ -63,9 +63,19 @@
 						return shallowCopy(nodePropertiesStorage[nodeName]);
 					}
 
+
+					const shallowCopyArray = function(source) {
+						return Object.assign([], source);
+					};
+
+					const getNodeNames = function() {
+						return shallowCopyArray(nodeNames);
+					}
+
 					return {
 						addNode,
-						getNode
+						getNode,
+						getNodeNames
 					};
 				};
 
@@ -126,8 +136,27 @@
 					let testGraph = generateGraphStructure();
 
 					let nodeName = "A";
-					let nodeData = {description: "A node"};
-					testGraph.addNode(nodeName, nodeData);
+					let nodeDescription = "A node";
+					let nodeProperties = {description: nodeDescription};
+
+					let newNodeDescription = "A node with new description";
+					testGraph.setNodeProperty(nodeName, "description", newNodeDescription);
+					if (testGraph.getNode(nodeName).description !== newNodeDescription) {
+						throw new Error("Attempt to change property that was set during adding failed!");
+					}
+
+				}
+				catch (e) {
+					alert("setNodeProperty API failed!\n" + e);
+					throw e;
+				}
+
+				try {
+					let testGraph = generateGraphStructure();
+
+					let nodeName = "A";
+
+					testGraph.addNode(nodeName);
 					if (testGraph.getNodeNames().length !== 1) {
 						throw new Error("Getting node names failed!");
 					}

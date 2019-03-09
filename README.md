@@ -14,11 +14,25 @@ Have a page with functionality that can be adapted to specific case. Like add sp
 
 ## Technical decisions
 
-* Custom graph data structure implementation (TO-DO)
-* Listeners as basis for interactivity (TO-DO)
-* SVG as main way to render things (TO-DO)
+Custom graph data structure implementation (WIP):
+
+ * Graph consist of nodes
+ * Each node has unique name and associated map of properties
+ * Only float, boolean, strings allowed as property values
+ * any get API call returns shallow copy. Any modification to it would not change coreGraph state.
+ * there is special getNodeNames and setNodeProperty API
+
+TO-DO:
+
+* Listeners as basis for interactivity
+* SVG as main way to render things
 
 ## History
+
+## 0.8
+- graph data structure API added
+- test for new API added
+- docs improved
 
 ## 0.7
 - input validation added
