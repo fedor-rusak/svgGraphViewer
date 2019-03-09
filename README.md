@@ -10,7 +10,7 @@ Just open [svgGraphViewer.html](svgGraphViewer.html) in your browser to start ap
 
 ## Goal
 
-Have a page with functionality that can be adapted to specific case. Like add specific shapes, colors, behaviors and etc without learning new super fancy API.
+Have a interactive web-page with graph-interactive functionality that can be adapted to specific case. Like add specific shapes, colors, behaviors and etc without learning new super fancy API.
 
 ## Technical decisions
 
@@ -31,7 +31,7 @@ TO-DO:
 
 ## 0.8
 - graph data structure API added
-- test for new API added
+- tests improved
 - docs improved
 
 ## 0.7
