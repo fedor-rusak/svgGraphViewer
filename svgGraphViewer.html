@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.18</title>
+		<title>svgGraphViewer 0.19</title>
 
 		<script>
 			"use strict";
@@ -625,9 +625,29 @@
 					);
 				};
 
+				const setListeners = function(svgRoot, coreGraphInstance) {
+					let sharedState = {
+						graph: coreGraphInstance,
+						mouseState: {
+							pressed: false
+						}
+					}
+
+					svgRoot.onmousedown = function(event) {
+						sharedState.mouseState.pressed = true;
+						console.log("down on " + event.target);
+					}
+
+					svgRoot.onmouseup = function() {
+						sharedState.mouseState.pressed = false;
+						console.log("up");
+					}
+				}
+
 				//module API
 				return {
-					renderGraph
+					renderGraph,
+					setListeners
 				}
 			}();
 		</script>
@@ -677,6 +697,9 @@
 					//rendering
 					var svgElement = document.querySelector("#svg");
 					svgGraphViewer.renderGraph(svgElement, graphInstance);
+
+					//interactivity added
+					svgGraphViewer.setListeners(svgElement, graphInstance);
 				}
 				catch (e) {
 					alert("Something went wrong in main setup code!\n\n"+ e);

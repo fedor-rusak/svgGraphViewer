@@ -29,9 +29,10 @@ Custom graph data structure implementation:
  * There is special getEdgeNames and setEdgeProperty API
  * Useful test suite to verify that most features and API work as intended
 
-TO-DO:
-
-* Listeners as basis for interactivity
+Listeners as basis for interactivity (WIP):
+* We have three main listeners: onMouseDown, onMouseMove, onMouseUp
+* One is just for stability and called onMouseLeave
+* Common way to make consistent behavior with listeners is to track some intermediate state
 
 SVG as main way to render things (WIP):
 * All starts from svg element that has predefined #id on a web-page
@@ -40,6 +41,9 @@ SVG as main way to render things (WIP):
 * Then we render nodes so they are in foreground
 
 ## History
+
+## 0.19
+- basic listeners added
 
 ## 0.18
 - edge rendering
