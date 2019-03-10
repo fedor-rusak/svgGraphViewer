@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.14</title>
+		<title>svgGraphViewer 0.15</title>
 
 		<script>
 			"use strict";
@@ -541,44 +541,63 @@
 		<script>
 			"use strict";
 
+			const svgGraphViewer = function() {
+				const TEXT_STYLE = "font: 25px Helvetica,sans-serif; text-anchor: middle; user-select: none; -webkit-user-select: none; -moz-user-select: none; cursor: default;";
+
+				const BLOCK_WIDTH = 100;
+				const BLOCK_HEIGHT = 40;
+				const CORNER_RADIUS = 15;
+				const DEFAULT_BLOCK_FILL = "#CCC";
+
+				const renderNode = function(svgRoot, x, y, text) {
+					const backgroundRect = svgHelper.generateSVGElement(
+						"rect",
+						{
+							fill: DEFAULT_BLOCK_FILL,
+							x,
+							y,
+							width: BLOCK_WIDTH,
+							height: BLOCK_HEIGHT,
+							rx: CORNER_RADIUS,
+							ry: CORNER_RADIUS
+						}
+					);
+
+					svgRoot.appendChild(backgroundRect);
+
+					let textElement = svgHelper.generateSVGElement(
+						"text",
+						{
+							style: TEXT_STYLE,
+							fill: "#222",
+							x: x+BLOCK_WIDTH/2, //center
+							y: y+BLOCK_HEIGHT/2+10 //center plus half font height
+						}
+					);
+
+					let textContent = document.createTextNode(text);
+					textElement.appendChild(textContent);
+
+					svgRoot.appendChild(textElement);
+				};
+
+				//module API
+				return {
+					renderNode
+				}
+			}();
+		</script>
+
+		<script>
+			"use strict";
+
 			window.onload = function () {
 				const graphInstance = coreGraph.generateGraphStructure();
+
 				alert("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 
 				var svgElement = document.querySelector("#svg");
-
-				const firstRect = svgHelper.generateSVGElement(
-					"rect",
-					{
-						fill: "#ccc",
-						x: 50,
-						y: 50,
-						width: 100,
-						height: 40,
-						rx: 15,
-						ry: 15
-					}
-				);
-
-				svgElement.appendChild(firstRect);
-
-
-				var textStyle = "font: 25px Helvetica,sans-serif; text-anchor: middle; user-select: none; -webkit-user-select: none; -moz-user-select: none; cursor: default;";
-
-				var label = svgHelper.generateSVGElement(
-					"text",
-					{
-						style: textStyle,
-						fill: "#222",
-						x: 50+100/2,
-						y: 50+40/2+10
-					}
-				);
-
-				var labelText = document.createTextNode("TEXT");
-				label.appendChild(labelText);
-
-				svgElement.appendChild(label);
+				svgGraphViewer.renderNode(svgElement, 50, 50, "TEXT");
 			};
 		</script>
 	</head>

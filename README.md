@@ -39,6 +39,9 @@ SVG as main way to render things (WIP):
 
 ## History
 
+## 0.15
+- Refactoring. Code turned into method of separate module.
+
 ## 0.14
 - first rendered SVG text with 'TEXT'
 
