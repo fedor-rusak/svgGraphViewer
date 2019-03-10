@@ -34,9 +34,17 @@ TO-DO:
 * Listeners as basis for interactivity
 
 SVG as main way to render things (WIP):
-* all starts from svg element that has predefined #id on a web-page
+* All starts from svg element that has predefined #id on a web-page
+* Then we have to do something with SVG elements like g, rect, text and normal text nodes
 
 ## History
+
+## 0.14
+- first rendered SVG text with 'TEXT'
+
+## 0.13
+- svgHelper introduced
+- first rendered SVG rect
 
 ## 0.12
 - got to SVG
