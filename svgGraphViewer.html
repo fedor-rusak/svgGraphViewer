@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.17</title>
+		<title>svgGraphViewer 0.18</title>
 
 		<script>
 			"use strict";
@@ -581,7 +581,42 @@
 					svgRoot.appendChild(textElement);
 				};
 
+				const renderEdge = function(svgRoot, startNode, endNode) {
+					const START_X = startNode.x + BLOCK_WIDTH/2;
+					const START_Y = startNode.y + BLOCK_HEIGHT/2;
+
+					const END_X = endNode.x + BLOCK_WIDTH/2;
+					const END_Y = endNode.y + BLOCK_HEIGHT/2;
+
+					//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
+					let pathCode = 
+						"M " + START_X + "," +START_Y +
+						" " + END_X + "," +END_Y;
+
+					let pathElement = svgHelper.generateSVGElement(
+						"path",
+						{
+							d: pathCode,
+							fill: "transparent",
+							stroke: "#66A",
+							style: "stroke-width: 3"
+						}
+					);
+
+					svgRoot.appendChild(pathElement);
+				}
+
 				const renderGraph = function(svgRoot, coreGraphInstance) {
+					coreGraphInstance.getEdgeNames().forEach( 
+						edgeName => {
+							let edge = coreGraphInstance.getEdge(edgeName);
+							let from = coreGraphInstance.getNode(edge.from);
+							let to = coreGraphInstance.getNode(edge.to);
+
+							renderEdge(svgRoot, from, to);
+						}
+					);
+
 					coreGraphInstance.getNodeNames().forEach( 
 						nodeName => {
 							let node = coreGraphInstance.getNode(nodeName);
@@ -607,15 +642,35 @@
 					//layouting aka assigning coordinates to nodes
 					const START_X = 50;
 					const START_Y = 50;
+					const X_STEP = 200;
 					const Y_STEP = 100;
+					const MAX_VERTICAL_NODES = 3;
 
 					const graphInstance = coreGraph.generateGraphStructure();
 					inputData.forEach( 
 						(node, index) => {
-							let x = START_X;
-							let y = START_Y+Y_STEP*index;
+							let x = START_X + X_STEP*(Math.floor(index / MAX_VERTICAL_NODES));
+							let y = START_Y+Y_STEP*(index % MAX_VERTICAL_NODES);
 
 							graphInstance.addNode(node.nodeName, {x, y});
+						}
+					);
+
+					//adding edges
+					inputData.forEach(
+						node => {
+							node.depends.forEach(
+								ancestorNodeName => {
+									let fromNodeName = ancestorNodeName;
+									let toNodeName = node.nodeName;
+									let edgeName = fromNodeName + "2" + toNodeName;
+
+									graphInstance.addEdge(
+										edgeName,
+										{from: fromNodeName, to: toNodeName}
+									);
+								}
+							);
 						}
 					);
 

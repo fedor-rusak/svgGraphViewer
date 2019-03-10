@@ -36,8 +36,15 @@ TO-DO:
 SVG as main way to render things (WIP):
 * All starts from svg element that has predefined #id on a web-page
 * Then we have to do something with SVG elements like g, rect, text and normal text nodes
+* First we render path elements for edges. So that they are in background
+* Then we render nodes so they are in foreground
 
 ## History
+
+## 0.18
+- edge rendering
+- layouting approach improved
+- data preparation step for edges
 
 ## 0.17
 - layouting as a separate step
