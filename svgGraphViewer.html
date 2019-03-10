@@ -2,20 +2,20 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.22</title>
+		<title>svgGraphViewer 0.23</title>
 
 		<script>
 			"use strict";
 
 			//example data with graph like
-			// A ---> B ---> C1
-			//           `-> C2 --> D1
-			//                  `-> D2
+			// ROOT_NODE ---> B ---> C1
+			//           `------`--> C2 --> D1
+			//                          `-> D2
 			const inputData = [
 				{nodeName: "ROOT_NODE", depends:[]},
 				{nodeName: "B", depends: ["ROOT_NODE"]},
 				{nodeName: "C1", depends: ["B"]},
-				{nodeName: "C2", depends: ["B"]},
+				{nodeName: "C2", depends: ["B", "ROOT_NODE"]},
 				{nodeName: "D1", depends: ["C2"]},
 				{nodeName: "D2", depends: ["C2"]}
 			];
@@ -592,6 +592,99 @@
 					svgRoot.appendChild(textElement);
 				};
 
+				//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
+				//To get optinal curve for distanced nodes we:
+				//1) check distance (and if it is greater than threshold)
+				//2) calculate average to find middle point
+				//3) if we think of x1,y1-x2,y2 as direction vector, then
+				// the desired point is perpencicularly to the right from middle of our vector
+				// on the distance of our threshold predefined value (this to-the-right
+				// is implemented via calculated SIGN modifier)
+				//4) combine three points and get final bezier curve coordinates
+				const generateBezierSVGCoordString = function(x1, y1, x2, y2) {
+					var xM = x2;
+					var yM = y2;
+					const DISTANCE = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+
+					const LENGTH_THRESHOLD = 150;
+
+					if (DISTANCE < LENGTH_THRESHOLD) {
+						//do nothing and use default values
+					}
+					//vertical
+					else if ((x2 - x1) === 0) {
+						const SIGN = y2 < y1 ? -1 : 1;
+
+						xM = x2 + SIGN*LENGTH_THRESHOLD;
+						yM = (y2+y1)/2;
+					}
+					//horizontal
+					else if ((y2 - y1) === 0) {
+						const SIGN = x2 > x1 ? -1 : 1;
+
+						xM = (x2+x1)/2;
+						yM = y2 + SIGN*LENGTH_THRESHOLD;
+					}
+					else {
+						const M = (y2-y1)/(x2-x1); //like in y = M * x
+
+						const MIDDLE_X = (x2+x1)/2;
+						const MIDDLE_Y = (y2+y1)/2;
+
+						const PERPENDICULAR_M = -1/M;
+
+						//Problem: find a "line" perpendicular to vector x1,y1-x2,y2 crossing
+						//its middle. Then get the point on that "line" distanced on predefined
+						//value from its crossing with original vector.
+						//
+						//Now we are talking in terms of right-angled triangle.
+						//             /|
+						//            / |
+						//           /  |
+						//          /   |
+						//         /a___|
+						//If we assume that left corner of this triangle is exactly on middle
+						//point between x1,y1 and x2,y2. And its hypotenuse is exactly
+						//perpendicular to our x1,y1-x2,y2 vector. Then knowing hypotenuse
+						//(which we chose ourselfes) and "a" angle we can calculate length of
+						//adjacent and opposite side. And our final point be like:
+						//    finalX = middleX + adjacent
+						//    finalY = middleY + opposite
+						//
+						//First step is to find "a" angle value.
+						//As we know that:
+						//    tangent = opposite_side/adjacent_side,
+						//So it is similar to:
+						//    tangent = (y2-y1)/(x2-x1)
+						//Which looks almost like M from:
+						//    y = M * X
+						//To get perpendicular M we just do this:
+						//    perpendicularM = -1/M;
+						//We can get "a" angle (left one on diagram) with this:
+						//    a = atan(perpendicularM)
+						//Now we remember the relation:
+						//    cos(a) = adjacent/hypotenuse
+						//So first piece of a puzzle:
+						//    adjacent = cos(a) * hypotenuse
+						//Another relation:
+						//    sin(a) = opposite/hypotenuse
+						//Last piece of a puzzle:
+						//    opposite = sin(a) * hypotenuse
+
+						const HYPOTENUSE = LENGTH_THRESHOLD;
+						const A_ANGLE = Math.atan(PERPENDICULAR_M);
+						const ADJECENT_SIDE = Math.cos(A_ANGLE) * HYPOTENUSE;
+						const OPPOSITE_SIDE = Math.sin(A_ANGLE) * HYPOTENUSE;
+
+						const SIGN = y2 < y1 ? -1 : 1;
+
+						xM = MIDDLE_X + SIGN*ADJECENT_SIDE;
+						yM = MIDDLE_Y + SIGN*OPPOSITE_SIDE;
+					}
+
+					return String.prototype.concat("M ", x1, ",", y1, " Q ", xM, ",", yM, " ", x2, ",", y2);
+				}
+
 				const renderEdge = function(svgRoot, startNode, endNode) {
 					const START_X = startNode.x;
 					const START_Y = startNode.y;
@@ -599,10 +692,8 @@
 					const END_X = endNode.x;
 					const END_Y = endNode.y;
 
-					//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
-					let pathCode = 
-						"M " + START_X + "," +START_Y +
-						" " + END_X + "," +END_Y;
+
+					let pathCode = generateBezierSVGCoordString(START_X, START_Y, END_X, END_Y);
 
 					let pathElement = svgHelper.generateSVGElement(
 						"path",
@@ -718,7 +809,7 @@
 
 					//layouting aka assigning coordinates to nodes
 					const START_X = 150;
-					const START_Y = 50;
+					const START_Y = 150;
 					const X_STEP = 200;
 					const Y_STEP = 100;
 					const MAX_VERTICAL_NODES = 3;

@@ -44,6 +44,11 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 
 ## History
 
+## 0.23
+- edge geometry changed to cool bezier curves with (I hope) useful description of math behined
+- slightly changed layoting start point
+- added edge for default graph data
+
 ## 0.22
 - dynamic width for nodes, calculated based on default font
 - now x,y are actually centers of nodes
