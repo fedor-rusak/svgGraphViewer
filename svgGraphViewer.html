@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.15</title>
+		<title>svgGraphViewer 0.16</title>
 
 		<script>
 			"use strict";
@@ -592,12 +592,29 @@
 			"use strict";
 
 			window.onload = function () {
-				const graphInstance = coreGraph.generateGraphStructure();
+				try {
+					const graphInstance = coreGraph.generateGraphStructure();
 
-				alert("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
+					console.log("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 
-				var svgElement = document.querySelector("#svg");
-				svgGraphViewer.renderNode(svgElement, 50, 50, "TEXT");
+					var svgElement = document.querySelector("#svg");
+
+					const START_X = 50;
+					const START_Y = 50;
+					const Y_STEP = 100;
+
+					inputData.forEach( 
+						(node, index) => {
+							let x = START_X;
+							let y = START_Y+Y_STEP*index;
+
+							svgGraphViewer.renderNode(svgElement, x, y, node.nodeName);
+						}
+					);
+				}
+				catch (e) {
+					alert("Something went wrong in main setup code!\n\n"+ e);
+				}
 			};
 		</script>
 	</head>

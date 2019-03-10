@@ -39,6 +39,11 @@ SVG as main way to render things (WIP):
 
 ## History
 
+## 0.16
+- Default graph data nodes now are rendered
+- Default message now logged instead of being alerted
+- Error catching for main setup steps
+
 ## 0.15
 - Refactoring. Code turned into method of separate module.
 
