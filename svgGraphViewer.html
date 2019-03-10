@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.19</title>
+		<title>svgGraphViewer 0.20</title>
 
 		<script>
 			"use strict";
@@ -629,17 +629,36 @@
 					let sharedState = {
 						graph: coreGraphInstance,
 						mouseState: {
-							pressed: false
+							pressed: false,
+							coords: {
+								x: undefined,
+								y: undefined
+							}
 						}
 					}
 
 					svgRoot.onmousedown = function(event) {
 						sharedState.mouseState.pressed = true;
+						sharedState.mouseState.coords.x = event.clientX;
+						sharedState.mouseState.coords.y = event.clientY;
+
 						console.log("down on " + event.target);
+					}
+
+					svgRoot.onmousemove = function(event) {
+						if (!sharedState.mouseState.pressed) return;
+
+						sharedState.mouseState.coords.x = event.clientX;
+						sharedState.mouseState.coords.y = event.clientY;
+
+						console.log("moved to " + event.clientX +","+event.clientY);
 					}
 
 					svgRoot.onmouseup = function() {
 						sharedState.mouseState.pressed = false;
+						sharedState.mouseState.coords.x = undefined;
+						sharedState.mouseState.coords.y = undefined;
+
 						console.log("up");
 					}
 				}
