@@ -39,6 +39,11 @@ SVG as main way to render things (WIP):
 
 ## History
 
+## 0.17
+- layouting as a separate step
+- renderGraph as high-level API
+- coreGraph integrated
+
 ## 0.16
 - Default graph data nodes now are rendered
 - Default message now logged instead of being alerted

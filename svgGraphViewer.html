@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.16</title>
+		<title>svgGraphViewer 0.17</title>
 
 		<script>
 			"use strict";
@@ -581,9 +581,18 @@
 					svgRoot.appendChild(textElement);
 				};
 
+				const renderGraph = function(svgRoot, coreGraphInstance) {
+					coreGraphInstance.getNodeNames().forEach( 
+						nodeName => {
+							let node = coreGraphInstance.getNode(nodeName);
+							renderNode(svgRoot, node.x, node.y, node.name);
+						}
+					);
+				};
+
 				//module API
 				return {
-					renderNode
+					renderGraph
 				}
 			}();
 		</script>
@@ -593,24 +602,26 @@
 
 			window.onload = function () {
 				try {
-					const graphInstance = coreGraph.generateGraphStructure();
-
 					console.log("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 
-					var svgElement = document.querySelector("#svg");
-
+					//layouting aka assigning coordinates to nodes
 					const START_X = 50;
 					const START_Y = 50;
 					const Y_STEP = 100;
 
+					const graphInstance = coreGraph.generateGraphStructure();
 					inputData.forEach( 
 						(node, index) => {
 							let x = START_X;
 							let y = START_Y+Y_STEP*index;
 
-							svgGraphViewer.renderNode(svgElement, x, y, node.nodeName);
+							graphInstance.addNode(node.nodeName, {x, y});
 						}
 					);
+
+					//rendering
+					var svgElement = document.querySelector("#svg");
+					svgGraphViewer.renderGraph(svgElement, graphInstance);
 				}
 				catch (e) {
 					alert("Something went wrong in main setup code!\n\n"+ e);
