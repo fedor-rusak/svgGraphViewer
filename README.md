@@ -33,6 +33,7 @@ There are 2 main ways to use listeners: Set them on every object and set them on
 * We have three main listeners: onMouseDown, onMouseMove, onMouseUp
 * One is just for stability and called onMouseLeave
 * Common way to make consistent behavior with listeners is to track some intermediate state
+* To move whole graph I use concept of camera. If we want to move graph we move... camera operator position!
 
 SVG as main way to render things (WIP):
 * All starts from svg element that has predefined #id on a web-page
@@ -41,6 +42,9 @@ SVG as main way to render things (WIP):
 * Then we render nodes so they are in foreground
 
 ## History
+
+## 0.21
+- whole graph can be moved
 
 ## 0.20
 - mouse movement coordinates tracked when necessary

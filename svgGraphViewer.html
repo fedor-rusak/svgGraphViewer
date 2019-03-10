@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.20</title>
+		<title>svgGraphViewer 0.21</title>
 
 		<script>
 			"use strict";
@@ -533,7 +533,8 @@
 
 				//module API
 				return {
-					generateSVGElement
+					generateSVGElement,
+					setSVGAttribute
 				}
 			}();
 		</script>
@@ -627,7 +628,14 @@
 
 				const setListeners = function(svgRoot, coreGraphInstance) {
 					let sharedState = {
+						svgRoot,
 						graph: coreGraphInstance,
+						camera: {
+							coords: {
+								x: 0,
+								y: 0
+							}
+						},
 						mouseState: {
 							pressed: false,
 							coords: {
@@ -635,7 +643,7 @@
 								y: undefined
 							}
 						}
-					}
+					};
 
 					svgRoot.onmousedown = function(event) {
 						sharedState.mouseState.pressed = true;
@@ -643,16 +651,36 @@
 						sharedState.mouseState.coords.y = event.clientY;
 
 						console.log("down on " + event.target);
-					}
+					};
 
 					svgRoot.onmousemove = function(event) {
 						if (!sharedState.mouseState.pressed) return;
 
-						sharedState.mouseState.coords.x = event.clientX;
-						sharedState.mouseState.coords.y = event.clientY;
+						let newX = event.clientX;
+						let newY = event.clientY;
+
+						let deltaX = sharedState.mouseState.coords.x - newX;
+						let deltaY = sharedState.mouseState.coords.y - newY;
+
+
+						//camera position modification
+						let cameraCoords = sharedState.camera.coords;
+						cameraCoords.x -= deltaX;
+						cameraCoords.y -= deltaY;
+
+						//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+						svgHelper.setSVGAttribute(
+							sharedState.svgRoot, "transform",
+							"translate("+cameraCoords.x+","+cameraCoords.y+")"
+						);
+
+
+						//mouse state update
+						sharedState.mouseState.coords.x = newX;
+						sharedState.mouseState.coords.y = newY;
 
 						console.log("moved to " + event.clientX +","+event.clientY);
-					}
+					};
 
 					svgRoot.onmouseup = function() {
 						sharedState.mouseState.pressed = false;
@@ -660,7 +688,7 @@
 						sharedState.mouseState.coords.y = undefined;
 
 						console.log("up");
-					}
+					};
 				}
 
 				//module API
