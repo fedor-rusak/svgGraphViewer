@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.21</title>
+		<title>svgGraphViewer 0.22</title>
 
 		<script>
 			"use strict";
@@ -12,8 +12,8 @@
 			//           `-> C2 --> D1
 			//                  `-> D2
 			const inputData = [
-				{nodeName: "A", depends:[]},
-				{nodeName: "B", depends: ["A"]},
+				{nodeName: "ROOT_NODE", depends:[]},
+				{nodeName: "B", depends: ["ROOT_NODE"]},
 				{nodeName: "C1", depends: ["B"]},
 				{nodeName: "C2", depends: ["B"]},
 				{nodeName: "D1", depends: ["C2"]},
@@ -545,19 +545,29 @@
 			const svgGraphViewer = function() {
 				const TEXT_STYLE = "font: 25px Helvetica,sans-serif; text-anchor: middle; user-select: none; -webkit-user-select: none; -moz-user-select: none; cursor: default;";
 
-				const BLOCK_WIDTH = 100;
+				let textMeasuringContext = document.createElement("canvas").getContext("2d");
+				textMeasuringContext.font = "25px Helvetica,sans-serif";
+
+				const measureText = function(text) {
+					return textMeasuringContext.measureText(text).width;
+				}
+
+				const ADDITIONAL_TEXT_PADDING = measureText(" ") * 10;
+
 				const BLOCK_HEIGHT = 40;
 				const CORNER_RADIUS = 15;
-				const DEFAULT_BLOCK_FILL = "#CCC";
+				const DEFAULT_NODE_FILL = "#CCC";
 
 				const renderNode = function(svgRoot, x, y, text) {
+					let width = measureText(text) + ADDITIONAL_TEXT_PADDING;
+
 					const backgroundRect = svgHelper.generateSVGElement(
 						"rect",
 						{
-							fill: DEFAULT_BLOCK_FILL,
-							x,
-							y,
-							width: BLOCK_WIDTH,
+							fill: DEFAULT_NODE_FILL,
+							x: x - width/2,
+							y: y - BLOCK_HEIGHT/2,
+							width: width,
 							height: BLOCK_HEIGHT,
 							rx: CORNER_RADIUS,
 							ry: CORNER_RADIUS
@@ -571,8 +581,8 @@
 						{
 							style: TEXT_STYLE,
 							fill: "#222",
-							x: x+BLOCK_WIDTH/2, //center
-							y: y+BLOCK_HEIGHT/2+10 //center plus half font height
+							x,
+							y: y+9 //center plus half font height
 						}
 					);
 
@@ -583,11 +593,11 @@
 				};
 
 				const renderEdge = function(svgRoot, startNode, endNode) {
-					const START_X = startNode.x + BLOCK_WIDTH/2;
-					const START_Y = startNode.y + BLOCK_HEIGHT/2;
+					const START_X = startNode.x;
+					const START_Y = startNode.y;
 
-					const END_X = endNode.x + BLOCK_WIDTH/2;
-					const END_Y = endNode.y + BLOCK_HEIGHT/2;
+					const END_X = endNode.x;
+					const END_Y = endNode.y;
 
 					//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
 					let pathCode = 
@@ -707,7 +717,7 @@
 					console.log("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
 
 					//layouting aka assigning coordinates to nodes
-					const START_X = 50;
+					const START_X = 150;
 					const START_Y = 50;
 					const X_STEP = 200;
 					const Y_STEP = 100;

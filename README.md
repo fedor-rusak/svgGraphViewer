@@ -35,13 +35,21 @@ There are 2 main ways to use listeners: Set them on every object and set them on
 * Common way to make consistent behavior with listeners is to track some intermediate state
 * To move whole graph I use concept of camera. If we want to move graph we move... camera operator position!
 
-SVG as main way to render things (WIP):
+REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 * All starts from svg element that has predefined #id on a web-page
 * Then we have to do something with SVG elements like g, rect, text and normal text nodes
 * First we render path elements for edges. So that they are in background
 * Then we render nodes so they are in foreground
+* When need to move whole thing we can just set special "transform" attribute and be happy!
 
 ## History
+
+## 0.22
+- dynamic width for nodes, calculated based on default font
+- now x,y are actually centers of nodes
+- name fix for default node fill
+- improved default graph data
+- improved docs
 
 ## 0.21
 - whole graph can be moved
