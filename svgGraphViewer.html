@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.9</title>
+		<title>svgGraphViewer 0.10</title>
 
 		<script>
 			"use strict";
@@ -29,7 +29,9 @@
 				const generateGraphStructure = function() {
 					//actual instance state
 					var nodeNames = [],
-					    nodePropertiesStorage = {};
+					    nodePropertiesStorage = {},
+					    edgeNames = [],
+					    edgePropertiesStorage = {};
 
 					const shallowCopy = function(source) {
 						return Object.assign({}, source);
@@ -93,11 +95,48 @@
 						return shallowCopyArray(nodeNames);
 					}
 
+					const addEdge = function(newEdgeName, newProperties) {
+						if (typeof newEdgeName !== 'string') {
+							throw new Error("Invalid edge name. Name: " + newEdgeName );
+						}
+
+						if (newProperties === undefined
+							|| typeof newProperties !== 'object'
+							|| typeof newProperties.from !== 'string'
+							|| typeof newProperties.to !== 'string'
+							|| !propertiesAreValid(newProperties)) {
+							throw new Error("Properties are invalid.");
+						}
+
+						if (nodePropertiesStorage[newProperties.from] === undefined
+							|| nodePropertiesStorage[newProperties.to] === undefined) {
+							throw new Error("Some nodes related to new edge do not exist! From: " +
+								newProperties.from + ", to: " + newProperties.to);
+						}
+
+						if (edgePropertiesStorage[newEdgeName] === undefined) {
+							edgePropertiesStorage[newEdgeName] = shallowCopy(newProperties);
+							edgePropertiesStorage[newEdgeName]["name"] = newEdgeName;
+							edgeNames.push(newEdgeName);
+						}
+					};
+
+					const getEdge = function(edgeName) {
+						return shallowCopy(edgePropertiesStorage[edgeName]);
+					}
+
+					const getEdgeNames = function() {
+						return shallowCopyArray(edgeNames);
+					}
+
 					return {
 						addNode,
 						getNode,
 						setNodeProperty,
-						getNodeNames
+						getNodeNames,
+						addEdge,
+						getEdge,
+						getEdgeNames
 					};
 				};
 
@@ -243,6 +282,110 @@
 				}
 				catch (e) {
 					alert("Getting nodeNames API failed!\n" + e);
+					throw e;
+				}
+
+
+				try {
+					let testGraph = generateGraphStructure();
+
+					let firstNodeName = "A";
+					let secondNodeName = "B";
+					testGraph.addNode(firstNodeName);
+					testGraph.addNode(secondNodeName);
+					let edgeName = "A2B";
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge(undefined, undefined);
+						},
+						"Can't add edge with undefined name!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge({name: "name"}, undefined);
+						},
+						"Can't add edge with non-string name!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge(edgeName, undefined);
+						},
+						"Can't add edge with undefined properties!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge(edgeName, {from: firstNodeName, to: secondNodeName, data:{}});
+						},
+						"Can't add edge with with property of 'object' type!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge(edgeName, {from: "Z", to: secondNodeName});
+						},
+						"Can't add edge when properties from or/and to point to non-existent node!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.addEdge(edgeName, {from: firstNodeName, to: "Z"});
+						},
+						"Can't add edge when properties from or/and to point to non-existent node!"
+					);
+
+
+					let edgeProperties = {from: firstNodeName, to: secondNodeName};
+					testGraph.addEdge(edgeName, {from: firstNodeName, to: secondNodeName});
+					if (testGraph.getEdge(edgeName).from !== firstNodeName) {
+						throw new Error("Getting saved edge failed!");
+					}
+
+					//attempt to modify properties used during adding
+					edgeProperties.from = secondNodeName;
+					if (testGraph.getEdge(edgeName).from !== firstNodeName) {
+						throw new Error("Keeping edge data encapsulated failed!");
+					}
+
+					//attempt to modify result from getting
+					testGraph.getEdge(edgeName).from = secondNodeName;
+					if (testGraph.getEdge(edgeName).from !== firstNodeName) {
+						throw new Error("Keeping get API edge data encapsulated failed!");
+					}
+				}
+				catch (e) {
+					alert("Adding&Getting Edge API failed!\n" + e);
+					throw e;
+				}
+
+				try {
+					let testGraph = generateGraphStructure();
+
+					let firstNodeName = "A";
+					let secondNodeName = "B";
+					testGraph.addNode(firstNodeName);
+					testGraph.addNode(secondNodeName);
+					testGraph.addEdge("A2B", {from: firstNodeName, to: secondNodeName});
+
+					if (testGraph.getEdgeNames().length !== 1) {
+						throw new Error("Getting edge names failed!");
+					}
+
+					testGraph.getEdgeNames().push("Improper edge adding!");
+					if (testGraph.getEdgeNames().length !== 1) {
+						throw new Error("Getting edge names encapsulation failed!");
+					}
+				}
+				catch (e) {
+					alert("Getting edgeNames API failed!\n" + e);
 					throw e;
 				}
 

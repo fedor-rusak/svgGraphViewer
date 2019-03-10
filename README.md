@@ -17,10 +17,16 @@ Have a interactive web-page with graph-interactive functionality that can be ada
 Custom graph data structure implementation (WIP):
 
  * Graph consist of nodes
+ * Adding node with already existing name will be ignored
  * Each node has unique name and associated map of properties
  * Only float, boolean, strings allowed as property values
- * any get API call returns shallow copy. Any modification to it would not change coreGraph state.
- * there is special getNodeNames and setNodeProperty API
+ * Any get API call returns shallow copy. Any modification to it would not change coreGraph state.
+ * There is special getNodeNames and setNodeProperty API
+ * Graph also contains edges
+ * Each edge has unique name and associated map of properties
+ * Edge adding requires valid from and to parameters, which point to existing nodes
+ * Edge properties have same rules for properties as node (validation, shallow copying)
+ * There is special getEdgeNames API
 
 TO-DO:
 
@@ -28,6 +34,11 @@ TO-DO:
 * SVG as main way to render things
 
 ## History
+
+## 0.10
+- edge API imrpovement
+- test improvement
+- docs improved
 
 ## 0.9
 - test refactoring
