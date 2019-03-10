@@ -14,7 +14,7 @@ Have a interactive web-page with graph-interactive functionality that can be ada
 
 ## Technical decisions
 
-Custom graph data structure implementation (WIP):
+Custom graph data structure implementation:
 
  * Graph consist of nodes
  * Adding node with already existing name will be ignored
@@ -26,7 +26,8 @@ Custom graph data structure implementation (WIP):
  * Each edge has unique name and associated map of properties
  * Edge adding requires valid from and to parameters, which point to existing nodes
  * Edge properties have same rules for properties as node (validation, shallow copying)
- * There is special getEdgeNames API
+ * There is special getEdgeNames and setEdgeProperty API
+ * Useful test suite to verify that most features and API work as intended
 
 TO-DO:
 
@@ -34,6 +35,9 @@ TO-DO:
 * SVG as main way to render things
 
 ## History
+
+## 0.11
+- basic graph data structure API finished
 
 ## 0.10
 - edge API imrpovement

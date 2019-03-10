@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.10</title>
+		<title>svgGraphViewer 0.11</title>
 
 		<script>
 			"use strict";
@@ -125,6 +125,30 @@
 						return shallowCopy(edgePropertiesStorage[edgeName]);
 					}
 
+					const setEdgeProperty = function(edgeName, propertyName, propertyValue) {
+						if (edgePropertiesStorage[edgeName] === undefined) {
+							throw new Error("Attempt to set property for non-existent edge. Edge name: " + edgeName);
+						}
+
+						if (typeof propertyName !== 'string') {
+							throw new Error("Only strings allowed as property names. Property name: " + propertyName);
+						}
+
+						if (propertyName === "name"
+						    || propertyName === "from"
+						    || propertyName === "to") {
+							throw new Error("Property '"+propertyName+"' can't be modified with this API.");
+						}
+
+						if (typeof propertyValue === 'object') {
+							throw new Error("Only strings, boolean, floats allowed as property values. Property value: " + JSON.stringify(propertyValue));
+						}
+
+						edgePropertiesStorage[edgeName][propertyName] = propertyValue;
+
+						return shallowCopy(edgePropertiesStorage[edgeName]);
+					};
+
 					const getEdgeNames = function() {
 						return shallowCopyArray(edgeNames);
 					}
@@ -136,6 +160,7 @@
 						getNodeNames,
 						addEdge,
 						getEdge,
+						setEdgeProperty,
 						getEdgeNames
 					};
 				};
@@ -363,6 +388,93 @@
 				}
 				catch (e) {
 					alert("Adding&Getting Edge API failed!\n" + e);
+					throw e;
+				}
+
+				try {
+					let testGraph = generateGraphStructure();
+
+					let firstNodeName = "A";
+					let secondNodeName = "B";
+					let edgeName = "A2B";
+					let edgeDescription = "An edge";
+					let edgeProperties = {
+						from: firstNodeName,
+						to: secondNodeName,
+						description: edgeDescription
+					};
+					let newEdgeDescription = "An edge with new description";
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, "description", newEdgeDescription);
+						},
+						"Setting property for non-existent edge is not allowed!"
+					);
+
+
+					//now nodes and edge must exist in graph
+					testGraph.addNode(firstNodeName);
+					testGraph.addNode(secondNodeName);
+					testGraph.addEdge(edgeName, edgeProperties);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, undefined, newEdgeDescription);
+						},
+						"Setting property with undefined name is not allowed!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, {name:"name"}, newEdgeDescription);
+						},
+						"Property name can only be a string!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, "name", "SneakyNewName");
+						},
+						"Property with name 'name' is not allowed to modify!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, "from", "SneakyNewName");
+						},
+						"Property with name 'from' is not allowed to modify!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, "to", "SneakyNewName");
+						},
+						"Property with name 'to' is not allowed to modify!"
+					);
+
+
+					wrapperForExceptionThrowingAPICall(
+						() => {
+							testGraph.setEdgeProperty(edgeName, "validPropertyName", {"note": "Objects not allowed!"});
+						},
+						"Setting property with 'object' value is not allowed!"
+					);
+
+
+					testGraph.setEdgeProperty(edgeName, "description", newEdgeDescription);
+					if (testGraph.getEdge(edgeName).description !== newEdgeDescription) {
+						throw new Error("Settings new value for property of existing edge failed!");
+					}
+				}
+				catch (e) {
+					alert("setEdgeProperty API failed!\n" + e);
 					throw e;
 				}
 
