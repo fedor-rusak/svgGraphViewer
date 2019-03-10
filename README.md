@@ -32,9 +32,14 @@ Custom graph data structure implementation:
 TO-DO:
 
 * Listeners as basis for interactivity
-* SVG as main way to render things
+
+SVG as main way to render things (WIP):
+* all starts from svg element that has predefined #id on a web-page
 
 ## History
+
+## 0.12
+- got to SVG
 
 ## 0.11
 - basic graph data structure API finished
