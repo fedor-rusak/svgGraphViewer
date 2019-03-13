@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.25</title>
+		<title>svgGraphViewer 0.26</title>
 
 		<script>
 			"use strict";
@@ -561,12 +561,20 @@
 				const renderNode = function(svgRoot, x, y, text) {
 					let width = measureText(text) + ADDITIONAL_TEXT_PADDING;
 
+					let nodeGroup = svgHelper.generateSVGElement("g");
+					svgHelper.setSVGAttribute(nodeGroup, "type", "node");
+					svgHelper.setSVGAttribute(nodeGroup, "name", text);
+					svgHelper.setSVGAttribute(nodeGroup, "width", width);
+					svgHelper.setSVGAttribute(nodeGroup, "height", BLOCK_HEIGHT);
+					svgHelper.setSVGAttribute(
+						nodeGroup, "transform",
+						"translate("+(x - width/2)+","+(y - BLOCK_HEIGHT/2)+")"
+					);
+
 					const backgroundRect = svgHelper.generateSVGElement(
 						"rect",
 						{
 							fill: DEFAULT_NODE_FILL,
-							x: x - width/2,
-							y: y - BLOCK_HEIGHT/2,
 							width: width,
 							height: BLOCK_HEIGHT,
 							rx: CORNER_RADIUS,
@@ -574,22 +582,25 @@
 						}
 					);
 
-					svgRoot.appendChild(backgroundRect);
+					nodeGroup.appendChild(backgroundRect);
 
 					let textElement = svgHelper.generateSVGElement(
 						"text",
 						{
 							style: TEXT_STYLE,
 							fill: "#222",
-							x,
-							y: y+9 //center plus half font height
+							x: width/2,
+							y: BLOCK_HEIGHT/2+9 //center plus half font height
 						}
 					);
 
 					let textContent = document.createTextNode(text);
 					textElement.appendChild(textContent);
 
-					svgRoot.appendChild(textElement);
+					nodeGroup.appendChild(textElement);
+
+					//final append to web-page
+					svgRoot.appendChild(nodeGroup);
 				};
 
 				//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
@@ -710,7 +721,10 @@
 
 				const renderGraph = function(svgRoot, coreGraphInstance) {
 					let cameraElement = svgHelper.generateSVGElement("g");
+					svgHelper.setSVGAttribute(cameraElement, "type", "special");
+					svgHelper.setSVGAttribute(cameraElement, "name", "camera");
 					svgRoot.appendChild(cameraElement);
+
 
 					coreGraphInstance.getEdgeNames().forEach( 
 						edgeName => {
@@ -730,6 +744,16 @@
 					);
 				};
 
+				const moveElement = function(svgRoot, type, name, x, y) {
+					if (type === "special" && name === "camera") {
+						//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+						svgHelper.setSVGAttribute(
+							svgRoot.childNodes[0], "transform",
+							"translate("+x+","+y+")"
+						);
+					}
+				}
+
 				const setCombinedListener = function(svgRoot, combinedEventListener) {
 					svgRoot.onmousedown = function(event) {
 						combinedEventListener("down", event);
@@ -747,6 +771,7 @@
 				//module API
 				return {
 					renderGraph,
+					moveElement,
 					setCombinedListener
 				}
 			}();
@@ -840,10 +865,9 @@
 							cameraCoords.x -= deltaX;
 							cameraCoords.y -= deltaY;
 
-							//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-							svgHelper.setSVGAttribute(
-								sharedState.svgRoot.childNodes[0], "transform",
-								"translate("+cameraCoords.x+","+cameraCoords.y+")"
+							svgGraphViewer.moveElement(
+								sharedState.svgRoot, "special", "camera",
+								cameraCoords.x, cameraCoords.y
 							);
 
 

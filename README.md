@@ -34,6 +34,8 @@ There are 2 main ways to use listeners: Set them on every object and set them on
 * One is just for stability and called onMouseLeave
 * Common way to make consistent behavior with listeners is to track some intermediate state
 * To move whole graph I use concept of camera. If we want to move graph we move... camera operator position!
+* Current experimental approach means you define combinedListener that works with every type of events. Be it down, move or up. And before that you define a shared state and its values. So that all the flexibility is yours.
+* To interact with SVG layer I use special type-system. So that SVG elements you want to interact with should have special attributes called *name* and *type*. Soon this would allow easier implementation of functionality like moving single nodes!
 
 REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 * All starts from svg element that has predefined #id on a web-page
@@ -41,8 +43,13 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 * First we render path elements for edges. So that they are in background
 * Then we render nodes so they are in foreground
 * When need to move whole thing we can just set special "transform" attribute and be happy!
+* In some cases we need width and height and for now we save it in SVG attributes
 
 ## History
+
+## 0.26
+- SVG layer type system introduced. New API.
+- Refactoring. Camera movement uses typed approach.
 
 ## 0.25
 - bug fix for clipping svg outside initial view area
