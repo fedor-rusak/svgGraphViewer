@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.23</title>
+		<title>svgGraphViewer 0.24</title>
 
 		<script>
 			"use strict";
@@ -727,75 +727,24 @@
 					);
 				};
 
-				const setListeners = function(svgRoot, coreGraphInstance) {
-					let sharedState = {
-						svgRoot,
-						graph: coreGraphInstance,
-						camera: {
-							coords: {
-								x: 0,
-								y: 0
-							}
-						},
-						mouseState: {
-							pressed: false,
-							coords: {
-								x: undefined,
-								y: undefined
-							}
-						}
-					};
-
+				const setCombinedListener = function(svgRoot, combinedEventListener) {
 					svgRoot.onmousedown = function(event) {
-						sharedState.mouseState.pressed = true;
-						sharedState.mouseState.coords.x = event.clientX;
-						sharedState.mouseState.coords.y = event.clientY;
-
-						console.log("down on " + event.target);
+						combinedEventListener("down", event);
 					};
 
 					svgRoot.onmousemove = function(event) {
-						if (!sharedState.mouseState.pressed) return;
-
-						let newX = event.clientX;
-						let newY = event.clientY;
-
-						let deltaX = sharedState.mouseState.coords.x - newX;
-						let deltaY = sharedState.mouseState.coords.y - newY;
-
-
-						//camera position modification
-						let cameraCoords = sharedState.camera.coords;
-						cameraCoords.x -= deltaX;
-						cameraCoords.y -= deltaY;
-
-						//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-						svgHelper.setSVGAttribute(
-							sharedState.svgRoot, "transform",
-							"translate("+cameraCoords.x+","+cameraCoords.y+")"
-						);
-
-
-						//mouse state update
-						sharedState.mouseState.coords.x = newX;
-						sharedState.mouseState.coords.y = newY;
-
-						console.log("moved to " + event.clientX +","+event.clientY);
+						combinedEventListener("move", event);
 					};
 
 					svgRoot.onmouseup = function() {
-						sharedState.mouseState.pressed = false;
-						sharedState.mouseState.coords.x = undefined;
-						sharedState.mouseState.coords.y = undefined;
-
-						console.log("up");
+						combinedEventListener("up");
 					};
 				}
 
 				//module API
 				return {
 					renderGraph,
-					setListeners
+					setCombinedListener
 				}
 			}();
 		</script>
@@ -847,7 +796,70 @@
 					svgGraphViewer.renderGraph(svgElement, graphInstance);
 
 					//interactivity added
-					svgGraphViewer.setListeners(svgElement, graphInstance);
+					let sharedState = {
+						svgRoot: svgElement,
+						graph: graphInstance,
+						camera: {
+							coords: {
+								x: 0,
+								y: 0
+							}
+						},
+						mouseState: {
+							pressed: false,
+							coords: {
+								x: undefined,
+								y: undefined
+							}
+						}
+					};
+
+					const combinedEventListener = function(eventType, event) {
+						if (eventType === "down") {
+							sharedState.mouseState.pressed = true;
+							sharedState.mouseState.coords.x = event.clientX;
+							sharedState.mouseState.coords.y = event.clientY;
+
+							console.log("down on " + event.target);
+						}
+						else if (eventType === "move") {
+							if (!sharedState.mouseState.pressed) return;
+
+							let newX = event.clientX;
+							let newY = event.clientY;
+
+							let deltaX = sharedState.mouseState.coords.x - newX;
+							let deltaY = sharedState.mouseState.coords.y - newY;
+
+
+							//camera position modification
+							let cameraCoords = sharedState.camera.coords;
+							cameraCoords.x -= deltaX;
+							cameraCoords.y -= deltaY;
+
+							//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+							svgHelper.setSVGAttribute(
+								sharedState.svgRoot, "transform",
+								"translate("+cameraCoords.x+","+cameraCoords.y+")"
+							);
+
+
+							//mouse state update
+							sharedState.mouseState.coords.x = newX;
+							sharedState.mouseState.coords.y = newY;
+
+							console.log("moved to " + event.clientX +","+event.clientY);
+						}
+						else if (eventType === "up") {
+							sharedState.mouseState.pressed = false;
+							sharedState.mouseState.coords.x = undefined;
+							sharedState.mouseState.coords.y = undefined;
+
+							console.log("up");
+						}
+					};
+
+					svgGraphViewer.setCombinedListener(svgElement, combinedEventListener);
 				}
 				catch (e) {
 					alert("Something went wrong in main setup code!\n\n"+ e);

@@ -44,6 +44,9 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 
 ## History
 
+## 0.24
+- experimental approach with combined listener
+
 ## 0.23
 - edge geometry changed to cool bezier curves with (I hope) useful description of math behined
 - slightly changed layoting start point
