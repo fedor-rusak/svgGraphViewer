@@ -44,8 +44,12 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 * Then we render nodes so they are in foreground
 * When need to move whole thing we can just set special "transform" attribute and be happy!
 * In some cases we need width and height and for now we save it in SVG attributes
+* And in case of edges we need whole bunch of info about nodes and its it attribute too!
 
 ## History
+
+## 0.28
+- edges are moving with nodes now
 
 ## 0.27
 - nodes can be moved

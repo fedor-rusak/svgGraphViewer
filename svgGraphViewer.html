@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.27</title>
+		<title>svgGraphViewer 0.28</title>
 
 		<script>
 			"use strict";
@@ -721,6 +721,13 @@
 						}
 					);
 
+					svgHelper.setSVGAttribute(pathElement, "from", startNode.name);
+					svgHelper.setSVGAttribute(pathElement, "fromX", startNode.x);
+					svgHelper.setSVGAttribute(pathElement, "fromY", startNode.y);
+					svgHelper.setSVGAttribute(pathElement, "to", endNode.name);
+					svgHelper.setSVGAttribute(pathElement, "toX", endNode.x);
+					svgHelper.setSVGAttribute(pathElement, "toY", endNode.y);
+
 					svgRoot.appendChild(pathElement);
 				}
 
@@ -765,12 +772,49 @@
 						translate(svgRoot.childNodes[0], x, y);
 					}
 					else if (type === "node") {
-						let nodeGroup = svgRoot.childNodes[0].querySelector("g[name="+name+"]");
+						let cameraElement = svgRoot.childNodes[0];
+						let nodeGroup = cameraElement.querySelector("g[name="+name+"]");
 						
 						let translateX = x - svgHelper.getSVGAttribute(nodeGroup, "width")/2;
 						let translateY = y - svgHelper.getSVGAttribute(nodeGroup, "height")/2;
 
 						translate(nodeGroup, translateX, translateY);
+
+						let edges = cameraElement.querySelectorAll(
+							"path[from="+name+"], path[to="+name+"]"
+						);
+						// alert(edges.length)
+						edges.forEach(
+							edge => {
+								let toX = parseInt(svgHelper.getSVGAttribute(edge, "toX"));
+								let toY = parseInt(svgHelper.getSVGAttribute(edge, "toY"));
+
+								let fromX = parseInt(svgHelper.getSVGAttribute(edge, "fromX"));
+								let fromY = parseInt(svgHelper.getSVGAttribute(edge, "fromY"));
+
+								let isFrom = svgHelper.getSVGAttribute(edge, "from") === name;
+								if (isFrom) {
+									fromX = x;
+									fromY = y;
+
+									svgHelper.setSVGAttribute(edge, "fromX", x);
+									svgHelper.setSVGAttribute(edge, "fromY", y);
+								}
+								else {
+									toX = x;
+									toY = y;
+
+									svgHelper.setSVGAttribute(edge, "toX", x);
+									svgHelper.setSVGAttribute(edge, "toY", y);
+								}
+
+								//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
+								svgHelper.setSVGAttribute(
+									edge, "d",
+									generateBezierSVGCoordString(fromX,fromY, toX,toY)
+								);
+							}
+						);
 					}
 				}
 
