@@ -44,6 +44,9 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things (WIP):
 
 ## History
 
+## 0.25
+- bug fix for clipping svg outside initial view area
+
 ## 0.24
 - experimental approach with combined listener
 

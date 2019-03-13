@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.24</title>
+		<title>svgGraphViewer 0.25</title>
 
 		<script>
 			"use strict";
@@ -709,20 +709,23 @@
 				}
 
 				const renderGraph = function(svgRoot, coreGraphInstance) {
+					let cameraElement = svgHelper.generateSVGElement("g");
+					svgRoot.appendChild(cameraElement);
+
 					coreGraphInstance.getEdgeNames().forEach( 
 						edgeName => {
 							let edge = coreGraphInstance.getEdge(edgeName);
 							let from = coreGraphInstance.getNode(edge.from);
 							let to = coreGraphInstance.getNode(edge.to);
 
-							renderEdge(svgRoot, from, to);
+							renderEdge(cameraElement, from, to);
 						}
 					);
 
 					coreGraphInstance.getNodeNames().forEach( 
 						nodeName => {
 							let node = coreGraphInstance.getNode(nodeName);
-							renderNode(svgRoot, node.x, node.y, node.name);
+							renderNode(cameraElement, node.x, node.y, node.name);
 						}
 					);
 				};
@@ -758,7 +761,7 @@
 
 					//layouting aka assigning coordinates to nodes
 					const START_X = 150;
-					const START_Y = 150;
+					const START_Y = 50;
 					const X_STEP = 200;
 					const Y_STEP = 100;
 					const MAX_VERTICAL_NODES = 3;
@@ -839,7 +842,7 @@
 
 							//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
 							svgHelper.setSVGAttribute(
-								sharedState.svgRoot, "transform",
+								sharedState.svgRoot.childNodes[0], "transform",
 								"translate("+cameraCoords.x+","+cameraCoords.y+")"
 							);
 
