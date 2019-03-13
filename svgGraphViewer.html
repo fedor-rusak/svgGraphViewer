@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.28</title>
+		<title>svgGraphViewer 0.29</title>
 
 		<script>
 			"use strict";
@@ -830,6 +830,15 @@
 					}
 				}
 
+				const moveNodeToForeground = function(svgRoot, name) {
+					let cameraElement = svgRoot.childNodes[0];
+					let nodeGroup = cameraElement.querySelector("g[name="+name+"]");
+
+					//move it to the top!
+					cameraElement.removeChild(nodeGroup);
+					cameraElement.appendChild(nodeGroup);
+				}
+
 				const setCombinedListener = function(svgRoot, combinedEventListener) {
 					svgRoot.onmousedown = function(event) {
 						let elementIdentifier = identifyElement(event.target);
@@ -850,6 +859,7 @@
 				return {
 					renderGraph,
 					moveElement,
+					moveNodeToForeground,
 					setCombinedListener
 				}
 			}();
@@ -927,6 +937,12 @@
 							sharedState.mouseState.coords.x = event.clientX;
 							sharedState.mouseState.coords.y = event.clientY;
 							sharedState.chosenElement = elementIdentifier;
+
+							if (elementIdentifier.type === "node") {
+								svgGraphViewer.moveNodeToForeground(
+									sharedState.svgRoot, elementIdentifier.name
+								);
+							}
 
 							console.log("down on " + event.target);
 						}
