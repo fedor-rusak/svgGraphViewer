@@ -55,6 +55,9 @@ TO-DO:
 
 ## History
 
+## 0.30
+- bright border around nodes
+
 ## 0.29
 - to-do ideas
 - docs improved

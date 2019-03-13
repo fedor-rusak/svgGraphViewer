@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.29</title>
+		<title>svgGraphViewer 0.30</title>
 
 		<script>
 			"use strict";
@@ -576,12 +576,29 @@
 						"translate("+(x - width/2)+","+(y - BLOCK_HEIGHT/2)+")"
 					);
 
+
+					const borderRect = svgHelper.generateSVGElement(
+						"rect",
+						{
+							fill: "#FFF",
+
+							width: width,
+							height: BLOCK_HEIGHT,
+							rx: CORNER_RADIUS,
+							ry: CORNER_RADIUS
+						}
+					);
+
+					nodeGroup.appendChild(borderRect);
+
 					const backgroundRect = svgHelper.generateSVGElement(
 						"rect",
 						{
 							fill: DEFAULT_NODE_FILL,
-							width: width,
-							height: BLOCK_HEIGHT,
+							x: 1,
+							y: 1,
+							width: width-2,
+							height: BLOCK_HEIGHT-2,
 							rx: CORNER_RADIUS,
 							ry: CORNER_RADIUS
 						}
