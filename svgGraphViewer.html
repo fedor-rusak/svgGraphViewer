@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.26</title>
+		<title>svgGraphViewer 0.27</title>
 
 		<script>
 			"use strict";
@@ -517,6 +517,10 @@
 					element.setAttributeNS(null, name, value);
 				}
 
+				const getSVGAttribute = function(element, name) {
+					return element.getAttributeNS(null, name);
+				}
+
 				const generateSVGElement = function(name, attributes) {
 					var result = document.createElementNS("http://www.w3.org/2000/svg", name);
 
@@ -534,7 +538,8 @@
 				//module API
 				return {
 					generateSVGElement,
-					setSVGAttribute
+					setSVGAttribute,
+					getSVGAttribute
 				}
 			}();
 		</script>
@@ -720,6 +725,9 @@
 				}
 
 				const renderGraph = function(svgRoot, coreGraphInstance) {
+					svgHelper.setSVGAttribute(svgRoot, "type", "special");
+					svgHelper.setSVGAttribute(svgRoot, "name", "root");
+
 					let cameraElement = svgHelper.generateSVGElement("g");
 					svgHelper.setSVGAttribute(cameraElement, "type", "special");
 					svgHelper.setSVGAttribute(cameraElement, "name", "camera");
@@ -744,19 +752,45 @@
 					);
 				};
 
-				const moveElement = function(svgRoot, type, name, x, y) {
-					if (type === "special" && name === "camera") {
-						//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
-						svgHelper.setSVGAttribute(
-							svgRoot.childNodes[0], "transform",
+				const translate = function(svgElement, x, y) {
+					//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform
+					svgHelper.setSVGAttribute(
+							svgElement, "transform",
 							"translate("+x+","+y+")"
 						);
+				}
+
+				const moveElement = function(svgRoot, type, name, x, y) {
+					if (type === "special" && name === "camera") {
+						translate(svgRoot.childNodes[0], x, y);
+					}
+					else if (type === "node") {
+						let nodeGroup = svgRoot.childNodes[0].querySelector("g[name="+name+"]");
+						
+						let translateX = x - svgHelper.getSVGAttribute(nodeGroup, "width")/2;
+						let translateY = y - svgHelper.getSVGAttribute(nodeGroup, "height")/2;
+
+						translate(nodeGroup, translateX, translateY);
+					}
+				}
+
+				const identifyElement = function(svgElement) {
+					let type = svgHelper.getSVGAttribute(svgElement, "type");
+					let name = svgHelper.getSVGAttribute(svgElement, "name");
+
+					if (type === null || name === null) {
+						return identifyElement(svgElement.parentNode)
+					}
+					else {
+						return {type, name};
 					}
 				}
 
 				const setCombinedListener = function(svgRoot, combinedEventListener) {
 					svgRoot.onmousedown = function(event) {
-						combinedEventListener("down", event);
+						let elementIdentifier = identifyElement(event.target);
+
+						combinedEventListener("down", event, elementIdentifier);
 					};
 
 					svgRoot.onmousemove = function(event) {
@@ -827,6 +861,7 @@
 					let sharedState = {
 						svgRoot: svgElement,
 						graph: graphInstance,
+						chosenElement: undefined,
 						camera: {
 							coords: {
 								x: 0,
@@ -842,11 +877,12 @@
 						}
 					};
 
-					const combinedEventListener = function(eventType, event) {
+					const combinedEventListener = function(eventType, event, elementIdentifier) {
 						if (eventType === "down") {
 							sharedState.mouseState.pressed = true;
 							sharedState.mouseState.coords.x = event.clientX;
 							sharedState.mouseState.coords.y = event.clientY;
+							sharedState.chosenElement = elementIdentifier;
 
 							console.log("down on " + event.target);
 						}
@@ -861,15 +897,34 @@
 
 
 							//camera position modification
-							let cameraCoords = sharedState.camera.coords;
-							cameraCoords.x -= deltaX;
-							cameraCoords.y -= deltaY;
+							let type = sharedState.chosenElement.type;
+							let name = sharedState.chosenElement.name;
 
-							svgGraphViewer.moveElement(
-								sharedState.svgRoot, "special", "camera",
-								cameraCoords.x, cameraCoords.y
-							);
+							if (type === "special"
+							    && (name === "camera" || name === "root")) {
+								let cameraCoords = sharedState.camera.coords;
+								cameraCoords.x -= deltaX;
+								cameraCoords.y -= deltaY;
 
+								svgGraphViewer.moveElement(
+									sharedState.svgRoot, type, "camera",
+									cameraCoords.x, cameraCoords.y
+								);
+							}
+							else if (type === "node") {
+								let graph = sharedState.graph;
+								let node = graph.getNode(name);
+								const x = node.x - deltaX;
+								const y = node.y - deltaY;
+
+								graph.setNodeProperty(name, "x", x);
+								graph.setNodeProperty(name, "y", y);
+
+								svgGraphViewer.moveElement(
+									sharedState.svgRoot, type, name,
+									x, y
+								);
+							}
 
 							//mouse state update
 							sharedState.mouseState.coords.x = newX;
@@ -881,6 +936,7 @@
 							sharedState.mouseState.pressed = false;
 							sharedState.mouseState.coords.x = undefined;
 							sharedState.mouseState.coords.y = undefined;
+							sharedState.chosenElement = undefined;
 
 							console.log("up");
 						}
