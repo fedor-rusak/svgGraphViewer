@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.31</title>
+		<title>svgGraphViewer 0.32</title>
 
 		<script>
 			"use strict";
@@ -548,32 +548,60 @@
 			"use strict";
 
 			const svgGraphViewer = function() {
-				const TEXT_STYLE = "font: 25px Helvetica,sans-serif; text-anchor: middle; user-select: none; -webkit-user-select: none; -moz-user-select: none; cursor: default;";
+				//So I want to know height of text element.
+				//I can limit myself to only one browser (March 2019). Nope.
+				//I can render div on page to calculate rendered result? Nope.
+				//So I sat down. Checked difference between font-size and actual
+				//text_element_height and got these results:
+				// 5   2.1
+				// 10  2.8
+				// 15  3.4
+				// 20  4
+				// 25  4.6
+				// 35  5.8
+				// 45  7
+				//Looks pretty linear so I made my naive approximation.
+				//Results are ok for sizes from 10 to 300.
+				const textHeightApproximation = function(size) {
+					if (size < 5) {
+						throw new Error("Currently no dynamic height approximation for fonts less than 5!");
+					}
+
+					const VALUE_FOR_FONT_SIZE_5 = 2.1;
+
+					return size + VALUE_FOR_FONT_SIZE_5 +(size-5)*0.1375;
+				}
+
+				const FONT_SIZE = 25;
+				const FONT = FONT_SIZE+"px Helvetica,sans-serif";
+				const TEXT_STYLE = "font: "+FONT+"; user-select: none; text-anchor: middle; -webkit-user-select: none; -moz-user-select: none; cursor: default;";
 
 				let textMeasuringContext = document.createElement("canvas").getContext("2d");
-				textMeasuringContext.font = "25px Helvetica,sans-serif";
+				textMeasuringContext.font = FONT;
 
 				const measureText = function(text) {
 					return textMeasuringContext.measureText(text).width;
 				}
 
-				const ADDITIONAL_TEXT_PADDING = measureText(" ") * 10;
+				const TEXT_ELEMENT_HEIGHT = textHeightApproximation(FONT_SIZE);
+				const ADDITIONAL_HORIZONTAL_PADDING = TEXT_ELEMENT_HEIGHT*3/2.5;
+				const ADDITIONAL_VERTICAL_PADDING = TEXT_ELEMENT_HEIGHT*3/5;
 
-				const BLOCK_HEIGHT = 40;
-				const CORNER_RADIUS = 15;
+				const CORNER_RADIUS = ADDITIONAL_HORIZONTAL_PADDING/2;
 				const DEFAULT_NODE_FILL = "#CCC";
 
 				const renderNode = function(svgRoot, x, y, text) {
-					let width = measureText(text) + ADDITIONAL_TEXT_PADDING;
+					let width = measureText(text) + ADDITIONAL_HORIZONTAL_PADDING;
+					let height = TEXT_ELEMENT_HEIGHT + ADDITIONAL_VERTICAL_PADDING;
 
 					let nodeGroup = svgHelper.generateSVGElement("g");
 					svgHelper.setSVGAttribute(nodeGroup, "type", "node");
 					svgHelper.setSVGAttribute(nodeGroup, "name", text);
 					svgHelper.setSVGAttribute(nodeGroup, "width", width);
-					svgHelper.setSVGAttribute(nodeGroup, "height", BLOCK_HEIGHT);
+					svgHelper.setSVGAttribute(nodeGroup, "height", height);
 					svgHelper.setSVGAttribute(
 						nodeGroup, "transform",
-						"translate("+(x - width/2)+","+(y - BLOCK_HEIGHT/2)+")"
+						"translate("+(x - width/2)+","+(y - height/2)+")"
 					);
 
 
@@ -583,7 +611,7 @@
 							fill: "#FFF",
 
 							width: width,
-							height: BLOCK_HEIGHT,
+							height: height,
 							rx: CORNER_RADIUS,
 							ry: CORNER_RADIUS
 						}
@@ -598,7 +626,7 @@
 							x: 1,
 							y: 1,
 							width: width-2,
-							height: BLOCK_HEIGHT-2,
+							height: height-2,
 							rx: CORNER_RADIUS,
 							ry: CORNER_RADIUS
 						}
@@ -606,13 +634,16 @@
 
 					nodeGroup.appendChild(backgroundRect);
 
+					//for SVG text with style "text-anchor: middle"
+					//x,y specify center BOTTOM position
+					//while for every other left TOP corner
 					let textElement = svgHelper.generateSVGElement(
 						"text",
 						{
 							style: TEXT_STYLE,
 							fill: "#222",
 							x: width/2,
-							y: BLOCK_HEIGHT/2+9 //center plus half font height
+							y: height/2+TEXT_ELEMENT_HEIGHT/3 //this just looks right.
 						}
 					);
 

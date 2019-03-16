@@ -34,13 +34,14 @@ There are 2 main ways to use listeners: Set them on every object and set them on
 * We have three main listeners: onMouseDown, onMouseMove, onMouseUp
 * One is just for stability and called onMouseLeave
 * Common way to make consistent behavior with listeners is to track some intermediate state
-* To move whole graph I use concept of camera. If we want to move graph we move... camera operator position!
-* Current experimental approach means you define combinedListener that works with every type of events. Be it down, move or up. And before that you define a shared state and its values. So that all the flexibility is yours.
+* To move whole graph I use concept of camera. If we want to move graph we move... camera operator "position"!
+* With current approach you define combinedListener that works with every type of events. Be it down, move or up. And before that you define a shared state and its values. So that all the flexibility is yours.
 * To interact with SVG layer I use special type-system. So that SVG elements you want to interact with should have special attributes called *name* and *type*. This allows more straight-forward code for node movement.
 * Added touch support for single touch UX through touchstart, touchmove, touchend
 * One is just for stability and called touchcancel
 
 REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things:
+
 * All starts from svg element that has predefined #id on a web-page
 * Then we have to do something with SVG elements like g, rect, text and normal text nodes
 * First we render path elements for edges. So that they are in background
@@ -55,8 +56,13 @@ TO-DO:
 * Better "how-to-use" docs. As this is a skeleton
 * Click functionality with changing colors for incoming and outgoing edges for highlighted node
 * Improve rendering and event handling to allow embedding svgGraphViewer as part of web-page
+* Serialization/Deserialization of graph to save/load node arrangement
 
 ## History
+
+## 0.32
+- dynamic block size calculation based on font size
+- docs improved
 
 ## 0.31
 - touch support
