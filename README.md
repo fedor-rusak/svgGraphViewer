@@ -2,15 +2,15 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Simple (fresh JS, SVG support required) web-page that contains all necessary JS to show and interact with nodes and edges of some default graph data.
+Simple (modern JS, SVG 1.1 support required) web-page that contains all necessary JS to show and interact with nodes and edges of some default graph data.
 
 ## Instructions
 
-Just open [svgGraphViewer.html](svgGraphViewer.html) in your browser to start application.
+Just open [svgGraphViewer.html](svgGraphViewer.html) in your browser to start application with default graph data.
 
 ## Goal
 
-Have a interactive web-page with graph-interactive functionality that can be adapted to specific case. Like add specific shapes, colors, behaviors and etc without learning new super fancy API.
+Have an interactive web-page with graph-interactive functionality that can be adapted to specific case. Like add specific shapes, colors, behaviors and etc without learning new super fancy API.
 
 ## Technical decisions
 
@@ -30,12 +30,15 @@ Custom graph data structure implementation:
  * Useful test suite to verify that most features and API work as intended
 
 There are 2 main ways to use listeners: Set them on every object and set them on parent object of some hierarchy. I prefer second one as it gives more control over hierarchy change and desired behavior. Listeners as basis for interactivity:
+
 * We have three main listeners: onMouseDown, onMouseMove, onMouseUp
 * One is just for stability and called onMouseLeave
 * Common way to make consistent behavior with listeners is to track some intermediate state
 * To move whole graph I use concept of camera. If we want to move graph we move... camera operator position!
 * Current experimental approach means you define combinedListener that works with every type of events. Be it down, move or up. And before that you define a shared state and its values. So that all the flexibility is yours.
 * To interact with SVG layer I use special type-system. So that SVG elements you want to interact with should have special attributes called *name* and *type*. This allows more straight-forward code for node movement.
+* Added touch support for single touch UX through touchstart, touchmove, touchend
+* One is just for stability and called touchcancel
 
 REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things:
 * All starts from svg element that has predefined #id on a web-page
@@ -54,6 +57,10 @@ TO-DO:
 * Improve rendering and event handling to allow embedding svgGraphViewer as part of web-page
 
 ## History
+
+## 0.31
+- touch support
+- docs improved
 
 ## 0.30
 - bright border around nodes

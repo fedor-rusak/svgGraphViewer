@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.30</title>
+		<title>svgGraphViewer 0.31</title>
 
 		<script>
 			"use strict";
@@ -870,6 +870,81 @@
 					svgRoot.onmouseup = function() {
 						combinedEventListener("up");
 					};
+
+					svgRoot.onmouseleave = function() {
+						combinedEventListener("up");
+					};
+
+
+					//touch part
+					//https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+					//idea is to handle only ONE touch event consistently
+					var theOnlyTouchIdentifier = undefined;
+
+					svgRoot.addEventListener("touchstart", 
+						touch => {
+							touch.preventDefault();
+							let touches = touch.changedTouches;
+
+							if (theOnlyTouchIdentifier === undefined) {
+								theOnlyTouchIdentifier = touches[0].identifier;
+
+								let elementIdentifier = identifyElement(touches[0].target);
+
+								combinedEventListener("down", touches[0], elementIdentifier);
+							}
+						},
+						false
+					);
+
+					svgRoot.addEventListener("touchmove",
+						touch => {
+							touch.preventDefault();
+
+							//ignore any touch event move if THE touch event ended
+							if (theOnlyTouchIdentifier === undefined) {
+								return;
+							}
+
+							let chosenTouch;
+							for (let i = 0; i < touch.changedTouches.length; i++) {
+								let currentTouch = touch.changedTouches[0];
+
+								if (currentTouch.identifier === theOnlyTouchIdentifier) {
+									chosenTouch = currentTouch;
+
+									combinedEventListener("move", chosenTouch);
+									break;
+								}
+							}
+
+						},
+						false
+					);
+
+					const touchendHandler = function(touch) {
+						touch.preventDefault();
+
+						//happens if THE touch event ended but ignored touch events
+						// were active before
+						if (theOnlyTouchIdentifier === undefined) {
+							return;
+						}
+
+						let chosenTouch;
+						for (let i = 0; i < touch.changedTouches.length; i++) {
+							let currentTouch = touch.changedTouches[0];
+
+							if (currentTouch.identifier === theOnlyTouchIdentifier) {
+								theOnlyTouchIdentifier = undefined;
+								break;
+							}
+						}
+
+					}
+
+					svgRoot.addEventListener("touchend", touchendHandler, false);
+					svgRoot.addEventListener("touchcancel", touchendHandler, false);
 				}
 
 				//module API
