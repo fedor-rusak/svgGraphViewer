@@ -1,16 +1,49 @@
-# svgGraphViewer idea
+# Interactive graph visualization with SVG (one web-page no dependencies)
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Simple (modern JS, SVG 1.1 support required) web-page that contains all necessary JS to show and interact with nodes and edges of some default graph data.
+*Simple* (modern JS =>,let,const; SVG 1.1 support required) web-page that contains all necessary JS to show and interact with nodes and edges described in default graph data.
 
-## Instructions
+Just open [svgGraphViewer.html](svgGraphViewer.html) in your browser to see some interconnected nodes and try to move something!
 
-Just open [svgGraphViewer.html](svgGraphViewer.html) in your browser to start application with default graph data.
+## Problem
 
-## Goal
+Static architecture, sequence diagrams are hard to read, modify, review. Maybe diagram with easily accessible interactivity would help to communicate the intent better.
 
-Have an interactive web-page with graph-interactive functionality that can be adapted to specific case. Like add specific shapes, colors, behaviors and etc without learning new super fancy API.
+If interactivity requires special software, subscription, access to external server than is just PITA and no one would bother with it.
+
+So how to describe relationship, dependencies, communication between some components in some interactive way and make it easy to share?
+
+## Proposed solution
+
+Nothing beats web-page without dependencies as a convenient way to show and share documents. You know about internet, right?
+
+But to make such page we would need some steps:
+
+1. describe nodes and edges as JSON
+2. chose desired visual design for visualization (typography, colors, sizes)
+3. assign coordinates to nodes for visualizing aka layoting (js, basic 2d geometry)
+4. visualize our JSON graph data with chosen style (JS, HTML5, SVG, DOM)
+5. add some browser-event-listener that would react to clicks and moves (JS, basic 2d geometry)
+6. PROFIT!
+
+I assume you are developer or at least JSON does not scare you away. So you will modify default inputData JSON value to describe the data you need.
+
+Visual design parts are just form of configuration on web-page i.e. variable with value *Helvetica,sans-serif*. No big deal.
+
+Part with assigning initial node position can be a pain, but you wanted to visualize you stuff right? You definitely can start with basic multi-column approach I used.
+
+Visualizing with DOM, SVG can be quite a pain so this part is neatly packaged inside separate stateless module with minimalistic API.
+
+Interactivity and event listener part is sort of hard. You should track events, state, and call API for modifying visualization. But if you really want to get some fun features you can't avoid this coding part. And I got your back with some pretty good default functionality of moving whole graph and separate nodes.
+
+## How to use
+
+1. Copy [svgGraphViewer.html](svgGraphViewer.html) file to your local machine.
+2. Modify inputData variable.
+3. Reload browser to check results.
+4. Modify other parts (JS, HTML, JSON) content as you wish.
+5. Get back to step 3 before you are satisfied.
 
 ## Technical decisions
 
@@ -52,13 +85,28 @@ REMEMBER! IN SVG 0,0 is LEFT TOP corner! SVG as main way to render things:
 * And in case of edges we need whole bunch of info about nodes and its it attribute too!
 * Render order specifies what is on top of each other. Want to move something to foreground? Rearrange svg elements order please.
 
-TO-DO:
-* Better "how-to-use" docs. As this is a skeleton
+## Good ideas for PR:
+
 * Click functionality with changing colors for incoming and outgoing edges for highlighted node
-* Improve rendering and event handling to allow embedding svgGraphViewer as part of web-page
 * Serialization/Deserialization of graph to save/load node arrangement
+* Some simple yet easy-to-grasp layout algorithm
+
+## Bad ideas for PR:
+
+Anyone is free to use this code as he/she desires. If someone wants to suggest PR please check this list first:
+
+* some cool dependency like d3.js, some other external things that solves your particular issue yet is not so common for visualization of graph data for shared documents
+* npm packaging, CI integrations, build scripts, browserifies, webpacks and everything else. Please use it as part of your fork.
+* making svgGraphViewer module stateful? No thanks.
+* adding something that would require great effor without great benefit for solving initial problem of this web-page
+* support for IE6 and similair? You know it is not 2011, right?
 
 ## History
+
+## 0.33
+- docs improved
+- module comments improved
+- Refactoring. Module moved inside svgGraphViewer.
 
 ## 0.32
 - dynamic block size calculation based on font size

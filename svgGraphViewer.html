@@ -2,15 +2,18 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>svgGraphViewer 0.32</title>
+		<title>svgGraphViewer 0.33</title>
 
 		<script>
 			"use strict";
 
-			//example data with graph like
+			//Example data with graph data that describes this:
+			//
 			// ROOT_NODE ---> B ---> C1
 			//           `------`--> C2 --> D1
 			//                          `-> D2
+			//
+			//Used by default for rendering.
 			const inputData = [
 				{nodeName: "ROOT_NODE", depends:[]},
 				{nodeName: "B", depends: ["ROOT_NODE"]},
@@ -24,7 +27,16 @@
 		<script>
 			"use strict";
 
-			//Graph-like data structure.
+			//Data structure for graph representation with features:
+			// 1) Node/edge identified by its unique name
+			// 2) Edge has mandatory properties "from" and "to"
+			// 3) Node/edge can have properties of type boolean, string, float
+            // 4) Node/edge "name" or edge "from"/"to" properties
+            //      can't be changed after adding
+			// 5) No deleting for node/edge
+			// 6) Setting/changing properties ONLY through special API
+			// 7) Every get operation returns shallow copy. Modify result object
+			//      as you want.
 			const coreGraph = function() {
 				const generateGraphStructure = function() {
 					//actual instance state
@@ -512,42 +524,56 @@
 		<script>
 			"use strict";
 
-			const svgHelper = function() {
-				const setSVGAttribute = function(element, name, value) {
-					element.setAttributeNS(null, name, value);
-				}
+			//Idea is that any SVG graph visualization scenario requires:
+			// 1) initial graph rendering
+			// 2) API to modify state of SVG elements (moving, ordering, etc.)
+			// 3) "simple" way to setup handling of single-touch/mouse events
+			//      related to user interaction with svg graph visualization
+			//
+			//It does NOT keep any state.
+			//Want to modify some SVG element? Provide svg root as parameter.
+			//
+			//It does use some tricks like:
+			// 1) keeping graph data as SVG attributes
+			// 2) dynamic block size based on font size
+			// 3) cool bezier curved edges
+			// 4) type-system for SVG elements to simplify interaction
+			const svgGraphViewer = function() {
 
-				const getSVGAttribute = function(element, name) {
-					return element.getAttributeNS(null, name);
-				}
-
-				const generateSVGElement = function(name, attributes) {
-					var result = document.createElementNS("http://www.w3.org/2000/svg", name);
-
-					if (attributes !== undefined) {
-						Object.keys(attributes).forEach(
-							key => {
-								setSVGAttribute(result, key, attributes[key]);
-							}
-						);
+				//SVG elements have some weird namespace thing for attributes.
+				const svgHelper = function() {
+					const setSVGAttribute = function(element, name, value) {
+						element.setAttributeNS(null, name, value);
 					}
 
-					return result;
-				}
+					const getSVGAttribute = function(element, name) {
+						return element.getAttributeNS(null, name);
+					}
 
-				//module API
-				return {
-					generateSVGElement,
-					setSVGAttribute,
-					getSVGAttribute
-				}
-			}();
-		</script>
+					const generateSVGElement = function(name, attributes) {
+						var result = document.createElementNS("http://www.w3.org/2000/svg", name);
 
-		<script>
-			"use strict";
+						if (attributes !== undefined) {
+							Object.keys(attributes).forEach(
+								key => {
+									setSVGAttribute(result, key, attributes[key]);
+								}
+							);
+						}
 
-			const svgGraphViewer = function() {
+						return result;
+					}
+
+					//module API
+					return {
+						generateSVGElement,
+						setSVGAttribute,
+						getSVGAttribute
+					}
+				}();
+
+				//NODE RENDER PART START
+
 				//So I want to know height of text element.
 				//I can limit myself to only one browser (March 2019). Nope.
 				//I can render div on page to calculate rendered result? Nope.
@@ -655,6 +681,10 @@
 					//final append to web-page
 					svgRoot.appendChild(nodeGroup);
 				};
+
+				//NODE RENDER PART END
+
+				//EDGE RENDER PART START
 
 				//https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
 				//To get optinal curve for distanced nodes we:
@@ -778,6 +808,8 @@
 
 					svgRoot.appendChild(pathElement);
 				}
+
+				//EDGE RENDER PART END
 
 				const renderGraph = function(svgRoot, coreGraphInstance) {
 					svgHelper.setSVGAttribute(svgRoot, "type", "special");
@@ -991,6 +1023,16 @@
 		<script>
 			"use strict";
 
+			//This is practically a DEMO code to use modules coreGraph and svgGraphViewer.
+			//
+			//Important steps:
+			// 1) generating coreGraph instance (its use for renderGraph!)
+			// 2) populating coreGraph instance with nodes and their positions (layoting!)
+			// 3) adding edges to coreGraph
+			// 4) render graph on predefined HTML element using svgGraphViewer
+			// 5) implement combinedEventLister function that is implementing all
+			//    the desired interactive functionality. By default it's moving of
+			//    whole graph and moving of chosen nodes. Works with touch events!
 			window.onload = function () {
 				try {
 					console.log("This is the first step in simple SVG graph Viewr application!" + "\nData: \n" +JSON.stringify(inputData, null, 4));
